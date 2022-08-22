@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          npm
+          npm ci
           npm run build
           cp ./dist/index.html ./dist/404.html
       - name: Deploy
