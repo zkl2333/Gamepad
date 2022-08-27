@@ -21,6 +21,10 @@ export const initTCPServer = () => {
         socket.on('close', () => {
             delete TCPclients[id];
         });
+        socket.on('error', (err) => {
+            console.log(err);
+            delete TCPclients[id];
+        })
     });
 
     //设置关闭时的回调函数

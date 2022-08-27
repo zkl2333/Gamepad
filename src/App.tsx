@@ -1,41 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useInterval } from "./hooks/useInterval";
+import { useEvent } from "./hooks/useEvent";
+import { useForceUpdate } from "./hooks/useForceUpdate";
 import "./App.css";
-
-const useEvent = (event: string, callback: (...args: any[]) => void) => {
-  useEffect(() => {
-    window.addEventListener(event, callback);
-    return () => window.removeEventListener(event, callback);
-  }, [event, callback]);
-};
-
-const useInterval = (callback: (...args: any[]) => void, delay: number) => {
-  const savedCallback = useRef<(...args: any[]) => void>();
-
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current && savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-};
-
-const useForceUpdate = () => {
-  const [, setTick] = useState(0);
-  return () => setTick((tick) => tick + 1);
-};
+import { useWebSocket } from "./hooks/useWebSocket";
 
 function App() {
   const [isGamepadConnected, setIsGamepadConnected] = useState(false);
   const [gamepadIndex, setGamepadIndex] = useState(0);
+  const { send } = useWebSocket("ws://localhost:8080");
 
   useEvent("gamepadconnected", function (e) {
     setIsGamepadConnected(true);
@@ -67,6 +40,15 @@ function App() {
   useInterval(forceUpdate, 100);
 
   const gamepad = getGamepad();
+
+  useEffect(() => {
+    if (gamepad?.buttons[13].pressed) {
+      send("down\r");
+    }
+    if (gamepad?.buttons[12].pressed) {
+      send("up\r");
+    }
+  }, [gamepad]);
 
   // console.log(gamepad);
 

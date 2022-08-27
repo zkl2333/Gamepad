@@ -5,6 +5,5 @@ export const initWsServer = () => {
         ws.on('message', function message(data) {
             console.log('received: %s', data);
         });
-        ws.send('something');
     });
 };
