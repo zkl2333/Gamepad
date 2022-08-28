@@ -58,14 +58,15 @@ const getChangeValue = (arr1: GamepadValue[], arr2: GamepadValue[]): GamepadValu
 
 let gamepadValueArr: { index: string; value: number }[] = [];
 
-const createGamepadValue = (gamepad: Gamepad) => {
+const createGamepadValue = (gamepad: Gamepad, all = false) => {
   const valueArr: { index: string; value: number }[] = [];
 
   gamepad.buttons.forEach((button, index) => {
     if (index === 6) {
       valueArr.push({
         index: index.toString(),
-        value: 700 + Math.floor(button.value * 300),
+        // value: 700 + Math.floor(button.value * 300),
+        value: Math.floor(button.value * 1000),
       });
     } else {
       valueArr.push({
@@ -82,7 +83,7 @@ const createGamepadValue = (gamepad: Gamepad) => {
     });
   });
 
-  const changeValue = getChangeValue(valueArr, gamepadValueArr);
+  const changeValue = all ? valueArr : getChangeValue(valueArr, gamepadValueArr);
 
   gamepadValueArr = valueArr;
 
@@ -93,11 +94,11 @@ const createGamepadValue = (gamepad: Gamepad) => {
     .join(",");
 };
 
-const scanGamepad = () => {
+const scanGamepad = (all = false) => {
   if (isGamepadConnected) {
     const gamepad = navigator.getGamepads()[gamepadIndex];
     if (gamepad) {
-      let gamepadValue = createGamepadValue(gamepad);
+      let gamepadValue = createGamepadValue(gamepad, all);
       if (gamepadValue) {
         console.log(gamepadValue);
         ws.send(gamepadValue + ";");
@@ -106,7 +107,21 @@ const scanGamepad = () => {
   }
 };
 
-setInterval(scanGamepad, 100);
+// setInterval(scanGamepad, 100);
+
+let cont = 0;
+setInterval(() => {
+  // 每五次发送一次
+  if (cont % 5 === 0) {
+    scanGamepad(true);
+  } else {
+    scanGamepad();
+  }
+  cont++;
+  if (cont > 100) {
+    cont = 0;
+  }
+}, 100);
 
 export const getGamepad = (): Gamepad | null => {
   if (isGamepadConnected) {
