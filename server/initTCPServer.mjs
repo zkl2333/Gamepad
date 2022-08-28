@@ -1,12 +1,15 @@
-import { server, TCPclients, wsServer } from './index.mjs';
+import { TCPServer, WSServer } from './index.mjs';
+
+// TCP连接池
+export const TCPclients = {};
 
 export const initTCPServer = () => {
-    server.on('listening', function () {
-        let address = server.address();
+    TCPServer.on('listening', function () {
+        let address = TCPServer.address();
         console.log('TCP server listening on %j', address);
     });
 
-    server.on('connection', (socket) => {
+    TCPServer.on('connection', (socket) => {
         const id = socket.remoteAddress + ':' + socket.remotePort;
         console.log('有新的客户端接入', id);
         TCPclients[id] = socket;
@@ -14,7 +17,7 @@ export const initTCPServer = () => {
         socket.on('data', (data) => {
             const msg = data.toString();
             console.log(msg);
-            wsServer.clients.forEach((client) => {
+            WSServer.clients.forEach((client) => {
                 client.send(msg);
             });
         });
@@ -28,12 +31,12 @@ export const initTCPServer = () => {
     });
 
     //设置关闭时的回调函数
-    server.on('close', function () {
+    TCPServer.on('close', function () {
         console.log('服务已关闭');
     });
 
     //设置出错时的回调函数
-    server.on('error', function (err) {
+    TCPServer.on('error', function (err) {
         console.log('服务运行异常', err);
     });
 

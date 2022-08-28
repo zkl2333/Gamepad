@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "antd/dist/antd.css";
 
 const ws = new WebSocket("ws://" + window.location.hostname + ":8080");
 
@@ -35,7 +36,7 @@ window.addEventListener("gamepaddisconnected", function (e) {
 
 // 死区
 const deadZone = (value: number) => {
-  return Math.abs(value) < 200 ? 0 : value;
+  return Math.abs(value) < 20 ? 0 : value;
 };
 
 type GamepadValue = { index: string; value: number };
@@ -58,28 +59,28 @@ const getChangeValue = (arr1: GamepadValue[], arr2: GamepadValue[]): GamepadValu
 
 let gamepadValueArr: { index: string; value: number }[] = [];
 
-const createGamepadValue = (gamepad: Gamepad, all = false) => {
+export const createGamepadValue = (gamepad: Gamepad, all = false) => {
   const valueArr: { index: string; value: number }[] = [];
 
-  gamepad.buttons.forEach((button, index) => {
-    if (index === 6) {
-      valueArr.push({
-        index: index.toString(),
-        // value: 700 + Math.floor(button.value * 300),
-        value: Math.floor(button.value * 1000),
-      });
-    } else {
-      valueArr.push({
-        index: index.toString(),
-        value: Math.floor(button.value * 1000),
-      });
-    }
-  });
+  // gamepad.buttons.forEach((button, index) => {
+  //   if (index === 6) {
+  //     valueArr.push({
+  //       index: index.toString(),
+  //       // value: 700 + Math.floor(button.value * 300),
+  //       value: Math.floor(button.value * 1000),
+  //     });
+  //   } else {
+  //     valueArr.push({
+  //       index: index.toString(),
+  //       value: Math.floor(button.value * 1000),
+  //     });
+  //   }
+  // });
 
   gamepad.axes.forEach((axis, index) => {
     valueArr.push({
       index: "a" + index,
-      value: deadZone(Math.floor(axis * 1000)),
+      value: deadZone(Math.floor(axis * 70)),
     });
   });
 
@@ -87,18 +88,21 @@ const createGamepadValue = (gamepad: Gamepad, all = false) => {
 
   gamepadValueArr = valueArr;
 
-  return changeValue
+  return changeValue;
+};
+
+const formatGamepadValue = (value: { index: string; value: number }[]) =>
+  value
     .map((item) => {
       return `${item.index}:${item.value}`;
     })
     .join(",");
-};
 
 const scanGamepad = (all = false) => {
   if (isGamepadConnected) {
     const gamepad = navigator.getGamepads()[gamepadIndex];
     if (gamepad) {
-      let gamepadValue = createGamepadValue(gamepad, all);
+      let gamepadValue = formatGamepadValue(createGamepadValue(gamepad, all));
       if (gamepadValue) {
         console.log(gamepadValue);
         ws.send(gamepadValue + ";");
@@ -106,8 +110,6 @@ const scanGamepad = (all = false) => {
     }
   }
 };
-
-// setInterval(scanGamepad, 100);
 
 let cont = 0;
 setInterval(() => {
@@ -118,7 +120,7 @@ setInterval(() => {
     scanGamepad();
   }
   cont++;
-  if (cont > 100) {
+  if (cont > 1000) {
     cont = 0;
   }
 }, 100);
