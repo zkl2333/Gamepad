@@ -1,9 +1,11 @@
 import { useInterval } from "./hooks/useInterval";
 import { useForceUpdate } from "./hooks/useForceUpdate";
-import { gamepadIndex, getGamepad, isGamepadConnected, setGamepadIndex } from "./main";
+import { getGamepadIndex, getGamepad, getIsGamepadConnected, setGamepadIndex } from "./main";
 import "./App.css";
 
 function App() {
+  const isGamepadConnected = getIsGamepadConnected();
+  const gamepadIndex = getGamepadIndex();
   const forceUpdate = useForceUpdate();
 
   useInterval(forceUpdate, 100);

@@ -3,10 +3,18 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-const ws = new WebSocket("ws://localhost:8080");
+const ws = new WebSocket("ws://" + window.location.hostname + ":8080");
 
 export let isGamepadConnected = false;
 export let gamepadIndex = 0;
+
+export const getIsGamepadConnected = () => {
+  return isGamepadConnected;
+};
+
+export const getGamepadIndex = () => {
+  return gamepadIndex;
+};
 
 export const setGamepadIndex = (index: number) => {
   gamepadIndex = index;
@@ -92,7 +100,7 @@ const scanGamepad = () => {
       let gamepadValue = createGamepadValue(gamepad);
       if (gamepadValue) {
         console.log(gamepadValue);
-        ws.send(gamepadValue + ",");
+        ws.send(gamepadValue + ";");
       }
     }
   }
